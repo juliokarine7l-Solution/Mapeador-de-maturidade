@@ -9,7 +9,7 @@ app.use(express.json());
 
 // Initialize Gemini SDK with User-Agent telemetry headers in httpOptions.
 const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
+  apiKey: process.env.GEMINI_API_KEY || "MISSING_KEY_PLEASE_ADD_IN_VERCEL_ENV_VARIABLES",
   httpOptions: {
     headers: {
       "User-Agent": "aistudio-build",

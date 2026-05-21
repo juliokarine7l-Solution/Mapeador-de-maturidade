@@ -1,0 +1,6 @@
+{
+  "name": "Mapeador de Maturidade e Estratégia",
+  "description": "Plataforma de diagnóstico de maturidade comercial e operacional com análise rigorosa corporativa e identificação de contradições por Inteligência Artificial.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

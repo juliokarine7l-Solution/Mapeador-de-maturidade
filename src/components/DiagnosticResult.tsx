@@ -23,6 +23,8 @@ import {
   Mail
 } from "lucide-react";
 
+import PresentationPreview from "./PresentationPreview";
+
 interface DiagnosticResultProps {
   brandName: string;
   result: FullAnalysisResponse;
@@ -33,7 +35,7 @@ export default function DiagnosticResult({ brandName, result, onRestart }: Diagn
   const [selectedPillarId, setSelectedPillarId] = useState<string | null>(
     result.pillars && result.pillars.length > 0 ? result.pillars[0].id : null
   );
-  const [viewMode, setViewMode] = useState<"dashboard" | "report" | "json">("dashboard");
+  const [viewMode, setViewMode] = useState<"dashboard" | "report" | "json" | "presentation">("dashboard");
   const [copied, setCopied] = useState(false);
 
   // Helper to get matching icons for pillars
@@ -173,6 +175,17 @@ export default function DiagnosticResult({ brandName, result, onRestart }: Diagn
             Dashboard Bento
           </button>
           <button
+            onClick={() => setViewMode("presentation")}
+            className={`flex-1 sm:flex-initial px-4 py-2.5 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${
+              viewMode === "presentation"
+                ? "bg-red-700 text-white shadow"
+                : "bg-slate-950 text-slate-400 hover:text-white border border-red-950/40 hover:border-slate-700"
+            }`}
+          >
+            <Sparkles className="h-4 w-4" />
+            Apresentação PPTX
+          </button>
+          <button
             onClick={() => setViewMode("report")}
             className={`flex-1 sm:flex-initial px-4 py-2.5 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${
               viewMode === "report"
@@ -197,7 +210,9 @@ export default function DiagnosticResult({ brandName, result, onRestart }: Diagn
         </div>
       </div>
 
-      {viewMode === "report" ? (
+      {viewMode === "presentation" ? (
+        <PresentationPreview brandName={brandName} result={result} />
+      ) : viewMode === "report" ? (
         <div className="space-y-6 animate-fade-in">
           {/* Markdown Output Area */}
           <div className="bg-[#180303] border border-red-950/40 rounded-3xl p-6.5 relative overflow-hidden">

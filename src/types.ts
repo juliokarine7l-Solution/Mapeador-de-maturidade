@@ -59,3 +59,24 @@ export interface SavedAssessment {
   };
   result: FullAnalysisResponse;
 }
+
+export interface SlideContent {
+  id: string;
+  type: string;
+  title: string;
+  subtitle?: string;
+  keyPoints?: string[];
+  metrics?: { label: string; value: string }[];
+  recommendations?: string[];
+  visualNotes?: string;
+  editableContent?: string;
+}
+
+export interface PresentationData {
+  title: string;
+  subtitle: string;
+  audience: string;
+  brandStyle: string;
+  slideCount: number;
+  slides: SlideContent[];
+}

@@ -27,9 +27,10 @@ import { FullAnalysisResponse, PillarFormulation, SavedAssessment } from "./type
 import DiagnosticResult from "./components/DiagnosticResult";
 
 import ConsultativeFlow from "./components/ConsultativeFlow";
+import PresentationManager from "./components/PresentationManager";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"internal" | "consultative">("internal");
+  const [activeTab, setActiveTab] = useState<"internal" | "consultative" | "presentation">("internal");
   const [brandName, setBrandName] = useState<string>("Acme Inc.");
 
   const [activeScenarioIdx, setActiveScenarioIdx] = useState<number | null>(0); // Default to first scenario for preview ease
@@ -346,7 +347,7 @@ export default function App() {
           <div className="space-y-6">
             
             {/* TAB SWITCHER */}
-            <div className="flex border-b border-red-950/40 relative">
+            <div className="flex border-b border-red-950/40 relative overflow-x-auto whitespace-nowrap custom-scrollbar">
               <button
                 onClick={() => setActiveTab("internal")}
                 className={`py-4 px-6 text-sm font-bold transition-all relative ${
@@ -370,9 +371,26 @@ export default function App() {
                   <span className="absolute bottom-0 left-0 w-full h-0.5 bg-red-600 rounded-t-full shadow-[0_-2px_10px_rgba(220,38,38,0.5)]" />
                 )}
               </button>
+              <button
+                onClick={() => setActiveTab("presentation")}
+                className={`py-4 px-6 text-sm font-bold transition-all relative flex items-center gap-2 ${
+                  activeTab === "presentation" ? "text-red-500" : "text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                Apresentação Executiva
+                {activeTab === "presentation" && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-red-600 rounded-t-full shadow-[0_-2px_10px_rgba(220,38,38,0.5)]" />
+                )}
+              </button>
             </div>
 
-            {activeTab === "consultative" ? (
+            {activeTab === "presentation" ? (
+              <PresentationManager 
+                history={history} 
+                currentResult={result} 
+                currentBrandName={brandName} 
+              />
+            ) : activeTab === "consultative" ? (
               <ConsultativeFlow 
                 onAddHistory={(item) => {
                   const updatedHistory = [item, ...history].slice(0, 10);

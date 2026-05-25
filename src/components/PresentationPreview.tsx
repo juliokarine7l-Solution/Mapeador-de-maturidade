@@ -11,6 +11,25 @@ interface PresentationPreviewProps {
 }
 
 export default function PresentationPreview({ brandName, result }: PresentationPreviewProps) {
+  // Pseudo-random helper to generate stable gradients based on brandName
+  const getDynamicStyles = (brand: string) => {
+    let hash = 0;
+    for (let i = 0; i < brand.length; i++) {
+        hash = brand.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue1 = Math.abs(hash % 360);
+    const hue2 = (hue1 + 40) % 360;
+    
+    return {
+      background: `linear-gradient(135deg, hsl(${hue1}, 40%, 12%) 0%, hsl(${hue2}, 50%, 6%) 100%)`,
+      primaryTheme: `hsl(${hue1}, 80%, 50%)`,
+      accentTheme: `hsl(${hue2}, 70%, 60%)`,
+      hexCode: `#${Math.floor(Math.abs(Math.sin(hash)) * 16777215).toString(16).padStart(6, '0')}` // Fallback hex for PPTX
+    };
+  };
+
+  const theme = getDynamicStyles(brandName);
+
   // Map diagnostic data into slides
   const createInitialSlides = (): SlideContent[] => {
     const slides: SlideContent[] = [];
@@ -157,7 +176,7 @@ export default function PresentationPreview({ brandName, result }: PresentationP
         title: "MASTER_B2B",
         background: { color: "11151D" },
         objects: [
-          { line: { x: 0, y: 0.5, w: "100%", h: 0, line: { color: "DC2626", width: 2 } } }
+          { line: { x: 0, y: 0.5, w: "100%", h: 0, line: { color: theme.hexCode.replace("#", ""), width: 2 } } }
         ]
       });
 
@@ -174,7 +193,7 @@ export default function PresentationPreview({ brandName, result }: PresentationP
 
         if (slide.metrics) {
           slide.metrics.forEach(m => {
-             slidePpt.addText(m.label + ": " + m.value, { x: 0.5, y: yPos, w: "20%", h: 0.5, fontSize: 16, color: "EF4444", bold: true });
+             slidePpt.addText(m.label + ": " + m.value, { x: 0.5, y: yPos, w: "20%", h: 0.5, fontSize: 16, color: theme.hexCode.replace("#", ""), bold: true });
              yPos += 0.8;
           });
         }
@@ -271,57 +290,76 @@ export default function PresentationPreview({ brandName, result }: PresentationP
             </button>
           </div>
 
-          <div id="slide-preview-container" className="flex-1 bg-[#0f111a] border border-slate-800 rounded-2xl p-8 flex flex-col justify-center relative overflow-hidden aspect-[16/9] w-full max-w-[800px] mx-auto">
+          <div 
+            id="slide-preview-container" 
+            className="flex-1 border border-slate-800 rounded-2xl p-8 flex flex-col justify-center relative overflow-hidden aspect-[16/9] w-full max-w-[800px] mx-auto"
+            style={{ background: theme.background }}
+          >
              {/* Slide Top Border decoration */}
-             <div className="absolute top-0 left-0 w-full h-1 bg-red-600" />
+             <div className="absolute top-0 left-0 w-full h-1.5" style={{ backgroundColor: theme.primaryTheme }} />
              
-             {currentSlide.type === "cover" ? (
-                <div className="text-center space-y-4">
-                  <h1 className="text-4xl md:text-5xl font-black text-white">{currentSlide.title}</h1>
-                  <h2 className="text-xl md:text-2xl text-red-500 font-semibold">{currentSlide.subtitle}</h2>
-                </div>
-             ) : (
-                <div className="h-full flex flex-col w-full">
-                  <h1 className="text-2xl md:text-3xl font-black text-white mb-6 border-b border-slate-800 pb-4">{currentSlide.title}</h1>
-                  
-                  {currentSlide.metrics && currentSlide.metrics.length > 0 && (
-                     <div className="mb-6 flex gap-4 w-full">
-                        {currentSlide.metrics.map((m, i) => (
-                           <div key={i} className="bg-red-600/10 border border-red-600/20 rounded-xl p-4">
-                             <div className="text-xs text-red-400 font-bold uppercase">{m.label}</div>
-                             <div className="text-3xl font-black text-white">{m.value}</div>
-                           </div>
-                        ))}
-                     </div>
-                  )}
-
-                  <div className="text-slate-300 xl:text-lg leading-relaxed flex-1 overflow-auto w-full">
-                    {currentSlide.editableContent && (
-                      <p className="whitespace-pre-wrap">{currentSlide.editableContent}</p>
-                    )}
-                    {currentSlide.keyPoints && (
-                      <ul className="space-y-3">
-                        {currentSlide.keyPoints.map((k, i) => (
-                           <li key={i} className="flex gap-3">
-                             <span className="text-red-500 font-bold">•</span>
-                             <span>{k}</span>
-                           </li>
-                        ))}
-                      </ul>
-                    )}
-                    {currentSlide.recommendations && (
-                      <ul className="space-y-3">
-                        {currentSlide.recommendations.map((k, i) => (
-                           <li key={i} className="flex gap-3">
-                             <span className="text-amber-500 font-bold">→</span>
-                             <span>{k}</span>
-                           </li>
-                        ))}
-                      </ul>
-                    )}
+             {/* Abstract background graphics */}
+             <div className="absolute -right-32 -bottom-32 w-96 h-96 rounded-full blur-[100px] opacity-20 pointer-events-none" style={{ backgroundColor: theme.accentTheme }} />
+             
+             <div className="relative z-10 w-full h-full flex flex-col justify-center">
+               {currentSlide.type === "cover" ? (
+                  <div className="text-center space-y-6">
+                    <div 
+                      className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border mb-4"
+                      style={{ borderColor: theme.primaryTheme, color: theme.accentTheme, backgroundColor: `${theme.primaryTheme}20` }}
+                    >
+                      Apresentação Executiva
+                    </div>
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight">{currentSlide.title}</h1>
+                    <h2 className="text-xl md:text-3xl font-semibold" style={{ color: theme.primaryTheme }}>{currentSlide.subtitle}</h2>
                   </div>
-                </div>
-             )}
+               ) : (
+                  <div className="h-full flex flex-col w-full">
+                    <h1 className="text-2xl md:text-3xl font-black text-white mb-6 border-b pb-4" style={{ borderColor: `${theme.primaryTheme}50` }}>{currentSlide.title}</h1>
+                    
+                    {currentSlide.metrics && currentSlide.metrics.length > 0 && (
+                       <div className="mb-6 flex gap-4 w-full">
+                          {currentSlide.metrics.map((m, i) => (
+                             <div 
+                               key={i} 
+                               className="border rounded-xl p-4 flex-1 shadow-lg"
+                               style={{ borderColor: `${theme.primaryTheme}40`, backgroundColor: `${theme.primaryTheme}10` }}
+                             >
+                               <div className="text-xs font-bold uppercase" style={{ color: theme.accentTheme }}>{m.label}</div>
+                               <div className="text-3xl md:text-4xl font-black text-white mt-1">{m.value}</div>
+                             </div>
+                          ))}
+                       </div>
+                    )}
+
+                    <div className="text-slate-200 xl:text-lg leading-relaxed flex-1 overflow-auto w-full custom-scrollbar pr-4">
+                      {currentSlide.editableContent && (
+                        <p className="whitespace-pre-wrap font-medium">{currentSlide.editableContent}</p>
+                      )}
+                      {currentSlide.keyPoints && (
+                        <ul className="space-y-4">
+                          {currentSlide.keyPoints.map((k, i) => (
+                             <li key={i} className="flex gap-4 items-start">
+                               <span className="font-bold text-xl leading-none mt-1" style={{ color: theme.primaryTheme }}>•</span>
+                               <span>{k}</span>
+                             </li>
+                          ))}
+                        </ul>
+                      )}
+                      {currentSlide.recommendations && (
+                        <ul className="space-y-4">
+                          {currentSlide.recommendations.map((k, i) => (
+                             <li key={i} className="flex gap-4 items-start">
+                               <span className="font-bold text-xl leading-none mt-1" style={{ color: theme.accentTheme }}>→</span>
+                               <span>{k}</span>
+                             </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+               )}
+             </div>
           </div>
 
           {/* Navigation Controls */}
